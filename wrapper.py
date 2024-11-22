@@ -58,7 +58,7 @@ def handler(event, context=None):
       return
    
    # Clean response folder
-   clean_folder('/response')
+   #clean_folder('/response')
    lambda_logs("response folder clean")
    
    # Initialize buckets params
