@@ -1,7 +1,7 @@
 import os
 import boto3
 import time
-import boto3
+import botocore
 
 SPLIT_APP_PATH = '/deps/pdftools-split/'
 PDF2IMAGE_APP_PATH = 'deps/pdftools-pdf2image/' 
@@ -100,7 +100,7 @@ def handler(event, context=None):
    
    
    
-   
+
    
       
    
