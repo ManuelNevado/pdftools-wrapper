@@ -48,7 +48,7 @@ def init_lambda_env():
    
 
 def handler(event, context=None):
-   
+   CWD = os.path.dirname(__file__)
    # Init env
    s3_client = init_lambda_env()
    
