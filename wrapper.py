@@ -1,19 +1,11 @@
 import os
 import boto3
-from datetime import datetime
-from fileinput import filename
-import json
 import time
-import uuid
-import logging
 import boto3
-import botocore
-from urllib.parse import unquote_plus
-from collections import Counter
-from statistics import mean
 
-SPLIT_APP_PATH = '/deps/pdftools-split/pdftoolssplit'
-PDF2IMAGE_APP_PATH = 'deps/pdftools-pdf2image/pdftoolspdf2imagesimple' 
+SPLIT_APP_PATH = '/deps/pdftools-split/'
+PDF2IMAGE_APP_PATH = 'deps/pdftools-pdf2image/' 
+INPUT_FILE_PATH = 'input/input.pdf'
 
 
 def lambda_logs(msg, level='low'):
@@ -86,11 +78,30 @@ def handler(event, context=None):
    
    # Download file
    try:
-      input_file = s3_client.download_file(input_bucket_name, input_bucket_key, '/input/input.pdf')
+      input_file = s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
    except Exception:
       lambda_logs(msg='something went wrong downloading the file from s3', level='error')
    
-   lambda_logs(msg="File downloaded to /input/input.pdf")
+   lambda_logs(msg=f"File downloaded to {INPUT_FILE_PATH}")
+   
+   # Get action
+   action = event['action']
+   
+   if action == 'split':
+      os.chdir(SPLIT_APP_PATH)
+      os.system(f"./pdftoolssplit {INPUT_FILE_PATH} /response/")
+   elif action == 'pdf2image':
+      os.chdir(PDF2IMAGE_APP_PATH)
+      os.system(f"./pdftoolspdf2image {INPUT_FILE_PATH} /response/response.jpeg")
+      
+   s3_client.upload_file(
+            Filename="/response/response.jpeg",
+            Bucket=output_bucket_name,
+            Key=output_bucket_key,
+            )
+   
+   
+   
    
    
    
