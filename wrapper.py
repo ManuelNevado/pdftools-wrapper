@@ -78,7 +78,7 @@ def handler(event, context=None):
    
    # Download file
    try:
-      input_response= s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
+      input_response = s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
    except Exception:
       lambda_logs(msg='something went wrong downloading the file from s3', level='error')
    
