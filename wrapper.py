@@ -3,6 +3,8 @@ import boto3
 import time
 import botocore
 import logging
+from urllib.parse import unquote_plus
+import uuid
 
 SPLIT_APP_PATH = '/deps/pdftools-split/'
 PDF2IMAGE_APP_PATH = '/deps/pdftools-pdf2image/' 
@@ -69,27 +71,25 @@ def handler(event, context=None):
    # Initialize buckets params
    # Keys
    try:
-      input_bucket_key = event['inputKey']
+      input_bucket_key = unquote_plus(event["inputKey"])
       output_bucket_key = event['outputKey']
+      input_file_path = "/tmp/{}{}".format(uuid.uuid4(), input_bucket_key.replace("/", ""))
    except Exception:
       logging.exception('something went wrong loading the bucket keys')
-      os.system('cat *.log')
    # Names
    try:
       input_bucket_name = event['inputName']
       output_bucket_name = event['outputName']
    except Exception:
       logging.exception('something went wrong loading the bucket names')
-      os.system('cat *.log')
    
    
    # Download file
    try:
-      input_response = s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
+      input_response = s3_client.download_file(input_bucket_name, input_bucket_key, input_file_path)
       lambda_logs(msg=f'Download Response: {input_response}', level='low')
    except Exception:
       logging.exception('something went wrong downloading the file from s3')
-      os.system('cat *.log')
    
    lambda_logs(msg=f"File downloaded to {INPUT_FILE_PATH}")
    
