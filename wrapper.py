@@ -2,7 +2,6 @@ import os
 import boto3
 import time
 import botocore
-import logging
 from urllib.parse import unquote_plus
 import uuid
 
@@ -54,7 +53,6 @@ def init_lambda_env():
 
 def handler(event, context=None):
    
-   logger = logging.getLogger()
    CWD = os.path.dirname(__file__)
    # Init env
    s3_client = init_lambda_env()
@@ -75,13 +73,13 @@ def handler(event, context=None):
       output_bucket_key = event['outputKey']
       input_file_path = "/tmp/{}{}".format(uuid.uuid4(), input_bucket_key.replace("/", ""))
    except Exception:
-      logging.exception('something went wrong loading the bucket keys')
+      lambda_logs('something went wrong loading the bucket keys')
    # Names
    try:
       input_bucket_name = event['inputName']
       output_bucket_name = event['outputName']
    except Exception:
-      logging.exception('something went wrong loading the bucket names')
+     lambda_logs('something went wrong loading the bucket names')
    
    
    # Download file
@@ -89,7 +87,7 @@ def handler(event, context=None):
       input_response = s3_client.download_file(input_bucket_name, input_bucket_key, input_file_path)
       lambda_logs(msg=f'Download Response: {input_response}', level='low')
    except Exception:
-      logging.exception('something went wrong downloading the file from s3')
+      lambda_logs('something went wrong downloading the file from s3')
    
    lambda_logs(msg=f"File downloaded to {INPUT_FILE_PATH}")
    
