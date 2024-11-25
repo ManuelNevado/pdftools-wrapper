@@ -5,8 +5,9 @@ import botocore
 from urllib.parse import unquote_plus
 import uuid
 
-SPLIT_APP_PATH = '/deps/pdftools-split/'
-PDF2IMAGE_APP_PATH = '/deps/pdftools-pdf2image/' 
+SPLIT_APP_PATH = '/app/'
+#PDF2IMAGE_APP_PATH = '/app/pdftools-pdf2image' 
+PDF2IMAGE_APP_PATH = '/app/' 
 INPUT_FILE_PATH = '/tmp/input/input.pdf'
 OUTPUT_FILE_PATH = '/tmp/response/'
 
@@ -42,14 +43,15 @@ def clean_folder(path):
 
 def init_lambda_env():
    
+   CWD = os.path.dirname(__file__)
+   
    #client_s3
    s3_client = boto3.client("s3")
    lambda_logs(msg=f"s3 client created. OBJ = {s3_client}")
    
    os.system('mkdir /tmp/input')
    os.system('mkdir /tmp/response')
-   print('ls /tmp')
-   os.system('ls /tmp')
+
    return s3_client
    
 
@@ -101,12 +103,11 @@ def handler(event, context=None):
    
    if action == 'split':
       os.chdir(SPLIT_APP_PATH)
-      os.system(f"./pdftoolssplit {INPUT_FILE_PATH} {OUTPUT_FILE_PATH}")
+      os.system(f"./pdftoolssplit {input_file_path} {OUTPUT_FILE_PATH}")
       # zip y subir
    elif action == 'pdf2image':
-      os.system('ls /deps')
       os.chdir(PDF2IMAGE_APP_PATH)
-      os.system(f"./pdftoolspdf2image {INPUT_FILE_PATH} {OUTPUT_FILE_PATH+'response.jpeg'}")
+      os.system(f"./pdftoolspdf2imgsimple {input_file_path} {OUTPUT_FILE_PATH+'response.jpeg'}")
       
    s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.jpeg',Bucket=output_bucket_name,Key=output_bucket_key)
    
