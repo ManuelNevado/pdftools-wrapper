@@ -66,7 +66,6 @@ def handler(event, context=None):
    
    # Clean response folder
    #clean_folder('/response')
-   lambda_logs("response folder clean")
    
    # Initialize buckets params
    # Keys
@@ -81,7 +80,7 @@ def handler(event, context=None):
       lambda_logs('something went wrong loading the bucket keys')
    # Names
    try:
-      input_bucket_name = event['inputName']
+      input_bucket_name = event['bucketName']
       output_bucket_name = event['outputName']
       lambda_logs(f"input_bucket_name: {input_bucket_name}")
       lambda_logs(f"output_bucket_name: {output_bucket_name}")
