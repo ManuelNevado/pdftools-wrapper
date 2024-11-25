@@ -79,6 +79,7 @@ def handler(event, context=None):
    # Download file
    try:
       input_response = s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
+      lambda_logs(msg=f'Download Response: {input_response}', level='low')
    except Exception:
       lambda_logs(msg='something went wrong downloading the file from s3', level='error')
    
@@ -92,6 +93,7 @@ def handler(event, context=None):
       os.system(f"./pdftoolssplit {INPUT_FILE_PATH} /response/")
       # zip y subir
    elif action == 'pdf2image':
+      os.system('ls')
       os.chdir(PDF2IMAGE_APP_PATH)
       os.system(f"./pdftoolspdf2image {INPUT_FILE_PATH} /response/response.jpeg")
       
