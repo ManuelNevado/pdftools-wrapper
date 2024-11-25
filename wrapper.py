@@ -5,7 +5,8 @@ import botocore
 
 SPLIT_APP_PATH = '/deps/pdftools-split/'
 PDF2IMAGE_APP_PATH = '/deps/pdftools-pdf2image/' 
-INPUT_FILE_PATH = '/input/input.pdf'
+INPUT_FILE_PATH = '/tmp/input/input.pdf'
+OUTPUT_FILE_PATH = '/tmp/response/'
 
 
 def lambda_logs(msg, level='low'):
@@ -90,14 +91,14 @@ def handler(event, context=None):
    
    if action == 'split':
       os.chdir(SPLIT_APP_PATH)
-      os.system(f"./pdftoolssplit {INPUT_FILE_PATH} /response/")
+      os.system(f"./pdftoolssplit {INPUT_FILE_PATH} {OUTPUT_FILE_PATH}")
       # zip y subir
    elif action == 'pdf2image':
       os.system('ls')
       os.chdir(PDF2IMAGE_APP_PATH)
-      os.system(f"./pdftoolspdf2image {INPUT_FILE_PATH} /response/response.jpeg")
+      os.system(f"./pdftoolspdf2image {INPUT_FILE_PATH} {OUTPUT_FILE_PATH+'response.jpeg'}")
       
-   s3_client.upload_file(Filename="/response/response.jpeg",Bucket=output_bucket_name,Key=output_bucket_key)
+   s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.jpeg',Bucket=output_bucket_name,Key=output_bucket_key)
    
    
    
