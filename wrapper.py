@@ -45,6 +45,8 @@ def init_lambda_env():
    s3_client = boto3.client("s3")
    lambda_logs(msg=f"s3 client created. OBJ = {s3_client}")
    
+   os.system('mkdir /tmp/input')
+   os.system('mkdir /tmp/response')
    return s3_client
    
 
