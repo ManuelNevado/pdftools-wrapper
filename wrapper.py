@@ -81,7 +81,7 @@ def handler(event, context=None):
    # Names
    try:
       input_bucket_name = event['bucketName']
-      output_bucket_name = event['outputName']
+      output_bucket_name = event['bucketName']
       lambda_logs(f"input_bucket_name: {input_bucket_name}")
       lambda_logs(f"output_bucket_name: {output_bucket_name}")
    except Exception:
