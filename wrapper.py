@@ -4,8 +4,8 @@ import time
 import botocore
 
 SPLIT_APP_PATH = '/deps/pdftools-split/'
-PDF2IMAGE_APP_PATH = 'deps/pdftools-pdf2image/' 
-INPUT_FILE_PATH = 'input/input.pdf'
+PDF2IMAGE_APP_PATH = '/deps/pdftools-pdf2image/' 
+INPUT_FILE_PATH = '/input/input.pdf'
 
 
 def lambda_logs(msg, level='low'):
