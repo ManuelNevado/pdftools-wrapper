@@ -48,6 +48,8 @@ def init_lambda_env():
    
    os.system('mkdir /tmp/input')
    os.system('mkdir /tmp/response')
+   print('ls /tmp')
+   os.system('ls /tmp')
    return s3_client
    
 
@@ -71,25 +73,29 @@ def handler(event, context=None):
    try:
       input_bucket_key = unquote_plus(event["inputKey"])
       output_bucket_key = event['outputKey']
-      input_file_path = "/tmp/{}{}".format(uuid.uuid4(), input_bucket_key.replace("/", ""))
+      input_file_path = "/tmp/input/{}{}".format(uuid.uuid4(), input_bucket_key.replace("/", ""))
+      lambda_logs(f"input_bucket_key: {input_bucket_key}")
+      lambda_logs(f"output_bucket_key: {output_bucket_key}")
+      lambda_logs(f"input_file_path: {input_file_path}")
    except Exception:
       lambda_logs('something went wrong loading the bucket keys')
    # Names
    try:
       input_bucket_name = event['inputName']
       output_bucket_name = event['outputName']
+      lambda_logs(f"input_bucket_name: {input_bucket_name}")
+      lambda_logs(f"output_bucket_name: {output_bucket_name}")
    except Exception:
      lambda_logs('something went wrong loading the bucket names')
    
    
    # Download file
    try:
+      lambda_logs(f's3_client.download_file({input_bucket_name}, {input_bucket_key}, {input_file_path})')
       input_response = s3_client.download_file(input_bucket_name, input_bucket_key, input_file_path)
       lambda_logs(msg=f'Download Response: {input_response}', level='low')
    except Exception:
       lambda_logs('something went wrong downloading the file from s3')
-   
-   lambda_logs(msg=f"File downloaded to {INPUT_FILE_PATH}")
    
    # Get action
    action = event['action']
