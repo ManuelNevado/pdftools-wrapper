@@ -2,12 +2,12 @@ import os
 import boto3
 import time
 import botocore
+import logging
 
 SPLIT_APP_PATH = '/deps/pdftools-split/'
 PDF2IMAGE_APP_PATH = '/deps/pdftools-pdf2image/' 
 INPUT_FILE_PATH = '/tmp/input/input.pdf'
 OUTPUT_FILE_PATH = '/tmp/response/'
-
 
 def lambda_logs(msg, level='low'):
    tick = time.time()
@@ -51,6 +51,8 @@ def init_lambda_env():
    
 
 def handler(event, context=None):
+   
+   logger = logging.getLogger()
    CWD = os.path.dirname(__file__)
    # Init env
    s3_client = init_lambda_env()
@@ -70,21 +72,24 @@ def handler(event, context=None):
       input_bucket_key = event['inputKey']
       output_bucket_key = event['outputKey']
    except Exception:
-      lambda_logs(msg='something went wrong loading the bucket keys', level='error')
+      logging.exception('something went wrong loading the bucket keys')
+      os.system('cat *.log')
    # Names
    try:
       input_bucket_name = event['inputName']
       output_bucket_name = event['outputName']
    except Exception:
-      lambda_logs(msg='something went wrong loading the bucket names', level='error')
+      logging.exception('something went wrong loading the bucket names')
+      os.system('cat *.log')
    
    
    # Download file
-   #try:
-   input_response = s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
-   lambda_logs(msg=f'Download Response: {input_response}', level='low')
-   #except Exception:
-   #   lambda_logs(msg='something went wrong downloading the file from s3', level='error')
+   try:
+      input_response = s3_client.download_file(input_bucket_name, input_bucket_key, INPUT_FILE_PATH)
+      lambda_logs(msg=f'Download Response: {input_response}', level='low')
+   except Exception:
+      logging.exception('something went wrong downloading the file from s3')
+      os.system('cat *.log')
    
    lambda_logs(msg=f"File downloaded to {INPUT_FILE_PATH}")
    
