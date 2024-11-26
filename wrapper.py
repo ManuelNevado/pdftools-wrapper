@@ -4,10 +4,12 @@ import time
 import botocore
 from urllib.parse import unquote_plus
 import uuid
+import shutil
 
-SPLIT_APP_PATH = '/app/'
+SPLIT_APP_PATH = '/app/split'
 #PDF2IMAGE_APP_PATH = '/app/pdftools-pdf2image' 
-PDF2IMAGE_APP_PATH = '/app/' 
+PDF2IMAGE_APP_PATH = '/app/pdf2image'
+TOPDFA_APP_PATH = '/app/topdfa'
 INPUT_FILE_PATH = '/tmp/input/input.pdf'
 OUTPUT_FILE_PATH = '/tmp/response/'
 
@@ -102,14 +104,34 @@ def handler(event, context=None):
    action = event['action']
    
    if action == 'split':
+      lambda_logs('split request')
       os.chdir(SPLIT_APP_PATH)
       os.system(f"./pdftoolssplit {input_file_path} {OUTPUT_FILE_PATH}")
+      shutil.make_archive('/tmp/response', 'zip', OUTPUT_FILE_PATH)
+      try:
+         s3_client.upload_file(Filename='/tmp/response.zip',Bucket=output_bucket_name,Key=output_bucket_key)
+         lambda_logs('Upload OK')
+      except:
+         lambda_logs('Upload ERROR', level='error')
       # zip y subir
    elif action == 'pdf2image':
+      lambda_logs('psd2image request')
       os.chdir(PDF2IMAGE_APP_PATH)
       os.system(f"./pdftoolspdf2imgsimple {input_file_path} {OUTPUT_FILE_PATH+'response.jpeg'}")
-      
-   s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.jpeg',Bucket=output_bucket_name,Key=output_bucket_key)
+      try:
+         s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.jpeg',Bucket=output_bucket_name,Key=output_bucket_key)
+         lambda_logs('Upload OK')
+      except:
+         lambda_logs('Upload ERROR', level='error')
+   elif action=='topdfa':
+      lambda_logs('topdfa request')
+      os.chdir(TOPDFA_APP_PATH)
+      os.system(f"./pdftoolsvalidateconvert {input_file_path} {OUTPUT_FILE_PATH+'response.pdf'}")
+      try:
+         s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.pdf',Bucket=output_bucket_name,Key=output_bucket_key)
+         lambda_logs('Upload OK')
+      except:
+         lambda_logs('Upload ERROR', level='error')
    
    
    
