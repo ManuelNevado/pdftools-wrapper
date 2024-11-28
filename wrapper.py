@@ -75,7 +75,7 @@ def handler(event, context=None):
    # Keys
    try:
       input_bucket_key = unquote_plus(event["inputKey"])
-      output_bucket_key = event['outputKey']
+      output_bucket_key = input_bucket_key.split('.')[0]
       input_file_path = "/tmp/input/{}{}".format(uuid.uuid4(), input_bucket_key.replace("/", ""))
       lambda_logs(f"input_bucket_key: {input_bucket_key}")
       lambda_logs(f"output_bucket_key: {output_bucket_key}")
@@ -84,8 +84,8 @@ def handler(event, context=None):
       lambda_logs('something went wrong loading the bucket keys')
    # Names
    try:
-      input_bucket_name = event['bucketName']
-      output_bucket_name = event['bucketName']
+      input_bucket_name = event['inputBucketName']
+      output_bucket_name = event['outputBucketName']
       lambda_logs(f"input_bucket_name: {input_bucket_name}")
       lambda_logs(f"output_bucket_name: {output_bucket_name}")
    except Exception:
@@ -108,6 +108,7 @@ def handler(event, context=None):
       os.chdir(SPLIT_APP_PATH)
       os.system(f"./pdftoolssplit {input_file_path} {OUTPUT_FILE_PATH}")
       shutil.make_archive('/tmp/response', 'zip', OUTPUT_FILE_PATH)
+      output_bucket_key+='.zip'
       try:
          s3_client.upload_file(Filename='/tmp/response.zip',Bucket=output_bucket_name,Key=output_bucket_key)
          lambda_logs('Upload OK')
@@ -118,6 +119,7 @@ def handler(event, context=None):
       lambda_logs('psd2image request')
       os.chdir(PDF2IMAGE_APP_PATH)
       os.system(f"./pdftoolspdf2imgsimple {input_file_path} {OUTPUT_FILE_PATH+'response.jpeg'}")
+      output_bucket_key+='.jpeg'
       try:
          s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.jpeg',Bucket=output_bucket_name,Key=output_bucket_key)
          lambda_logs('Upload OK')
@@ -127,11 +129,15 @@ def handler(event, context=None):
       lambda_logs('topdfa request')
       os.chdir(TOPDFA_APP_PATH)
       os.system(f"./pdftoolsvalidateconvert {input_file_path} {OUTPUT_FILE_PATH+'response.pdf'}")
+      output_bucket_key+='.pdf'
       try:
          s3_client.upload_file(Filename=OUTPUT_FILE_PATH+'response.pdf',Bucket=output_bucket_name,Key=output_bucket_key)
          lambda_logs('Upload OK')
       except:
          lambda_logs('Upload ERROR', level='error')
+   
+   
+   return output_bucket_key
    
    
    
